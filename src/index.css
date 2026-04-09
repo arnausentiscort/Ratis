@@ -1,3 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --cream:     #FAF8F4;
+  --rose:      #E8C5B8;
+  --sage:      #A8B8A0;
+  --terracotta:#C97B5A;
+  --ink:       #2C1810;
+}
+
+html {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  background: var(--cream);
+  overflow-x: hidden;
+}
