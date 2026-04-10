@@ -1,20 +1,24 @@
 import Hero from './sections/Hero'
 import Mural from './sections/Mural'
 import Map from './sections/Map'
+import Activities from './sections/Activities'
 import Timeline from './sections/Timeline'
 import Favorites from './sections/Favorites'
 
 export default function App() {
   return (
     <>
-      {/* Hero — pantalla de benvinguda */}
+      {/* Hero — slideshow fullscreen */}
       <Hero />
 
-      {/* Mural — galeria de fotos */}
+      {/* Mural — galeria masonry */}
       <Mural />
 
-      {/* Map — mapa de llocs visitats */}
+      {/* Map — mapa amb panel lateral */}
       <Map />
+
+      {/* Activities — pestanyes d'activitats */}
+      <Activities />
 
       {/* Timeline — la nostra història */}
       <Timeline />

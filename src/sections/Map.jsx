@@ -1,17 +1,16 @@
-// Sección Map — mapa interactiu amb llocs visitats
-// Els pins es generen automàticament a partir del GPS dels metadades EXIF.
+// Map — mapa interactiu. Clic en un pin → panel lateral amb foto gran + info EXIF.
 // Si una foto no té GPS, no apareix al mapa però sí al mural.
 
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import { motion } from 'framer-motion'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { photos } from '../data/photos'
 import { useExif } from '../hooks/useExif'
 
-// Pin personalitzat terracota
 const terracottaIcon = new L.Icon({
   iconUrl: `data:image/svg+xml;utf8,${encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
@@ -28,134 +27,229 @@ const terracottaIcon = new L.Icon({
 function formatDataDisplay(dataStr) {
   if (!dataStr) return null
   const [year, month] = dataStr.split('-')
-  const mesos = ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun',
-                  'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des']
+  const mesos = ['Gener','Febrer','Març','Abril','Maig','Juny',
+                  'Juliol','Agost','Setembre','Octubre','Novembre','Desembre']
   return `${mesos[parseInt(month, 10) - 1]} ${year}`
 }
 
-// Component per cada pin — només renderitza si té GPS
-function PhotoMarker({ photo }) {
-  const { lat, lng, data, lloc } = useExif(photo.src)
+// ── Pin individual: només renderitza si té GPS ──
+function PhotoMarker({ photo, onSelect }) {
+  const { lat, lng } = useExif(photo.src)
+  if (!lat || !lng) return null
+  return (
+    <Marker
+      position={[lat, lng]}
+      icon={terracottaIcon}
+      eventHandlers={{ click: () => onSelect(photo) }}
+    />
+  )
+}
+
+// ── Panel lateral que s'obre en clicar un pin ──
+function PhotoPanel({ photo, onClose }) {
+  const { data, lloc } = useExif(photo.src)
   const [imgError, setImgError] = useState(false)
 
-  if (!lat || !lng) return null
+  return createPortal(
+    <>
+      {/* Backdrop */}
+      <motion.div
+        key="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(44,24,16,0.38)',
+          zIndex: 1000,
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
+        }}
+      />
 
-  return (
-    <Marker position={[lat, lng]} icon={terracottaIcon}>
-      <Popup className="ratis-popup">
-        <div style={{ minWidth: '180px' }}>
-          {/* Imatge — placeholder gris si el fitxer no existeix */}
+      {/* Panel */}
+      <motion.aside
+        key="panel"
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          width: 'min(420px, 100vw)',
+          height: '100vh',
+          backgroundColor: '#FAF8F4',
+          boxShadow: '-8px 0 56px rgba(44,24,16,0.14)',
+          zIndex: 1001,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Foto gran */}
+        <div
+          style={{
+            height: '52vh',
+            backgroundColor: '#E8C5B8',
+            position: 'relative',
+            flexShrink: 0,
+          }}
+        >
+          {!imgError && (
+            <img
+              src={photo.src}
+              alt={lloc ?? ''}
+              onError={() => setImgError(true)}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          )}
+
+          {/* Gradient sobre la foto */}
           <div
+            aria-hidden
             style={{
-              width: '100%',
-              height: '110px',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              marginBottom: '10px',
-              backgroundColor: '#E8C5B8',
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(to bottom,rgba(0,0,0,0.0) 55%,rgba(44,24,16,0.45) 100%)',
+            }}
+          />
+
+          {/* Botó tancar */}
+          <button
+            onClick={onClose}
+            aria-label="Tancar"
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              border: 'none',
+              backgroundColor: 'rgba(0,0,0,0.35)',
+              color: '#fff',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              lineHeight: 1,
             }}
           >
-            {!imgError && (
-              <img
-                src={photo.src}
-                alt={lloc ?? ''}
-                onError={() => setImgError(true)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
-            )}
-          </div>
+            ×
+          </button>
+        </div>
 
-          {/* Lloc: coordenades del EXIF */}
-          <strong
+        {/* Informació */}
+        <div
+          style={{
+            padding: '32px 36px',
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0',
+          }}
+        >
+          {/* Lloc */}
+          <h3
             style={{
-              display: 'block',
               fontFamily: '"Playfair Display", serif',
-              fontSize: '1rem',
-              fontWeight: '500',
+              fontSize: '1.6rem',
+              fontWeight: '400',
               color: '#2C1810',
-              marginBottom: '2px',
+              lineHeight: 1.2,
+              marginBottom: '8px',
             }}
           >
-            {lloc}
-          </strong>
+            {lloc ?? 'Sense ubicació'}
+          </h3>
 
-          {/* Data del EXIF */}
+          {/* Data */}
           {data && (
             <span
               style={{
-                display: 'block',
                 fontFamily: '"DM Sans", sans-serif',
-                fontSize: '0.75rem',
+                fontSize: '0.8rem',
+                fontWeight: '400',
                 color: '#C97B5A',
-                marginBottom: '5px',
-                letterSpacing: '0.06em',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+                display: 'block',
               }}
             >
               {formatDataDisplay(data)}
             </span>
           )}
 
-          {/* Descripció manual */}
-          <span
+          {/* Separador */}
+          <div
+            style={{
+              width: '40px',
+              height: '1.5px',
+              backgroundColor: '#E8C5B8',
+              marginBottom: '20px',
+            }}
+          />
+
+          {/* Descripció */}
+          <p
             style={{
               fontFamily: '"DM Sans", sans-serif',
-              fontSize: '0.82rem',
-              color: '#7A6055',
-              lineHeight: 1.5,
+              fontSize: '0.95rem',
+              fontWeight: '300',
+              color: '#5A3E35',
+              lineHeight: 1.75,
+              margin: 0,
             }}
           >
             {photo.descripcio}
-          </span>
+          </p>
         </div>
-      </Popup>
-    </Marker>
+      </motion.aside>
+    </>,
+    document.body
   )
 }
 
 const mapStyles = `
   .ratis-map .leaflet-container {
     font-family: 'DM Sans', sans-serif;
+    cursor: crosshair;
   }
-  .ratis-popup .leaflet-popup-content-wrapper {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(44,24,16,0.10);
-    padding: 0;
-    border: none;
+  .ratis-map .leaflet-marker-icon {
+    cursor: pointer !important;
+    transition: transform 0.18s ease;
   }
-  .ratis-popup .leaflet-popup-content {
-    margin: 0;
-    padding: 16px 20px;
-    min-width: 180px;
-  }
-  .ratis-popup .leaflet-popup-tip {
-    background: #fff;
-  }
-  .ratis-popup .leaflet-popup-close-button {
-    color: #ccc;
-    font-size: 18px;
-    top: 8px;
-    right: 10px;
-  }
-  .ratis-popup .leaflet-popup-close-button:hover {
-    color: #C97B5A;
+  .ratis-map .leaflet-marker-icon:hover {
+    transform: scale(1.25) translateY(-4px) !important;
+    filter: drop-shadow(0 6px 12px rgba(201,123,90,0.5));
   }
 `
 
 export default function Map() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
+  const [selected, setSelected] = useState(null)
 
   return (
-    <section
-      style={{
-        backgroundColor: '#F5F1EA',
-        padding: '100px 48px',
-      }}
-    >
+    <section style={{ backgroundColor: '#F5F1EA', padding: '100px 48px' }}>
       <style>{mapStyles}</style>
 
-      {/* Títol */}
       <motion.h2
         ref={ref}
         initial={{ opacity: 0, y: 24 }}
@@ -168,13 +262,29 @@ export default function Map() {
           fontWeight: '400',
           color: '#2C1810',
           letterSpacing: '0.02em',
-          marginBottom: '56px',
+          marginBottom: '16px',
         }}
       >
         On hem estat
       </motion.h2>
 
-      {/* Targeta del mapa */}
+      <motion.p
+        initial={{ opacity: 0, y: 12 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.9, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+        style={{
+          textAlign: 'center',
+          fontFamily: '"DM Sans", sans-serif',
+          fontSize: '0.88rem',
+          fontWeight: '300',
+          color: '#7A6055',
+          marginBottom: '52px',
+          letterSpacing: '0.04em',
+        }}
+      >
+        Clica un pin per veure la foto
+      </motion.p>
+
       <motion.div
         className="ratis-map"
         initial={{ opacity: 0, y: 32 }}
@@ -193,7 +303,7 @@ export default function Map() {
           zoom={4}
           minZoom={2}
           maxZoom={10}
-          style={{ height: '500px', width: '100%' }}
+          style={{ height: '520px', width: '100%' }}
           scrollWheelZoom={false}
           zoomControl={true}
           worldCopyJump={false}
@@ -204,12 +314,18 @@ export default function Map() {
             attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           />
-
-          {photos.map((photo) => (
-            <PhotoMarker key={photo.id} photo={photo} />
+          {photos.map(photo => (
+            <PhotoMarker key={photo.id} photo={photo} onSelect={setSelected} />
           ))}
         </MapContainer>
       </motion.div>
+
+      {/* Panel lateral (portal → document.body) */}
+      <AnimatePresence>
+        {selected && (
+          <PhotoPanel photo={selected} onClose={() => setSelected(null)} />
+        )}
+      </AnimatePresence>
     </section>
   )
 }
