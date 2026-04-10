@@ -1,11 +1,15 @@
 // Sección Map — mapa interactiu amb llocs visitats
+// Els pins es generen automàticament a partir del GPS dels metadades EXIF.
+// Si una foto no té GPS, no apareix al mapa però sí al mural.
 
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import { photos } from '../data/photos'
+import { useExif } from '../hooks/useExif'
 
 // Pin personalitzat terracota
 const terracottaIcon = new L.Icon({
@@ -21,33 +25,92 @@ const terracottaIcon = new L.Icon({
   popupAnchor: [0, -38],
 })
 
-const llocs = [
-  {
-    nom: 'Barcelona',
-    coords: [41.3851, 2.1734],
-    descripcio: 'Casa nostra. La ciutat on tot va començar.',
-  },
-  {
-    nom: 'París',
-    coords: [48.8566, 2.3522],
-    descripcio: 'Passejant per la vora del Sena al capvespre.',
-  },
-  {
-    nom: 'Roma',
-    coords: [41.9028, 12.4964],
-    descripcio: 'Vam llançar una moneda a la Fontana di Trevi.',
-  },
-  {
-    nom: 'Lisboa',
-    coords: [38.7169, -9.1395],
-    descripcio: 'Tramvies, pastéis de nata i el Tajo al fons.',
-  },
-  {
-    nom: 'Amsterdam',
-    coords: [52.3676, 4.9041],
-    descripcio: 'Canals, bicicletes i tulipes a tot arreu.',
-  },
-]
+function formatDataDisplay(dataStr) {
+  if (!dataStr) return null
+  const [year, month] = dataStr.split('-')
+  const mesos = ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun',
+                  'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des']
+  return `${mesos[parseInt(month, 10) - 1]} ${year}`
+}
+
+// Component per cada pin — només renderitza si té GPS
+function PhotoMarker({ photo }) {
+  const { lat, lng, data, lloc } = useExif(photo.src)
+  const [imgError, setImgError] = useState(false)
+
+  if (!lat || !lng) return null
+
+  return (
+    <Marker position={[lat, lng]} icon={terracottaIcon}>
+      <Popup className="ratis-popup">
+        <div style={{ minWidth: '180px' }}>
+          {/* Imatge — placeholder gris si el fitxer no existeix */}
+          <div
+            style={{
+              width: '100%',
+              height: '110px',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              marginBottom: '10px',
+              backgroundColor: '#E8C5B8',
+            }}
+          >
+            {!imgError && (
+              <img
+                src={photo.src}
+                alt={lloc ?? ''}
+                onError={() => setImgError(true)}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            )}
+          </div>
+
+          {/* Lloc: coordenades del EXIF */}
+          <strong
+            style={{
+              display: 'block',
+              fontFamily: '"Playfair Display", serif',
+              fontSize: '1rem',
+              fontWeight: '500',
+              color: '#2C1810',
+              marginBottom: '2px',
+            }}
+          >
+            {lloc}
+          </strong>
+
+          {/* Data del EXIF */}
+          {data && (
+            <span
+              style={{
+                display: 'block',
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: '0.75rem',
+                color: '#C97B5A',
+                marginBottom: '5px',
+                letterSpacing: '0.06em',
+              }}
+            >
+              {formatDataDisplay(data)}
+            </span>
+          )}
+
+          {/* Descripció manual */}
+          <span
+            style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: '0.82rem',
+              color: '#7A6055',
+              lineHeight: 1.5,
+            }}
+          >
+            {photo.descripcio}
+          </span>
+        </div>
+      </Popup>
+    </Marker>
+  )
+}
 
 const mapStyles = `
   .ratis-map .leaflet-container {
@@ -142,33 +205,8 @@ export default function Map() {
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           />
 
-          {llocs.map((lloc) => (
-            <Marker key={lloc.nom} position={lloc.coords} icon={terracottaIcon}>
-              <Popup className="ratis-popup">
-                <strong
-                  style={{
-                    display: 'block',
-                    fontFamily: '"Playfair Display", serif',
-                    fontSize: '1rem',
-                    fontWeight: '500',
-                    color: '#2C1810',
-                    marginBottom: '5px',
-                  }}
-                >
-                  {lloc.nom}
-                </strong>
-                <span
-                  style={{
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontSize: '0.82rem',
-                    color: '#7A6055',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {lloc.descripcio}
-                </span>
-              </Popup>
-            </Marker>
+          {photos.map((photo) => (
+            <PhotoMarker key={photo.id} photo={photo} />
           ))}
         </MapContainer>
       </motion.div>
