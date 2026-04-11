@@ -5,42 +5,27 @@
 export const photos = [
   {
     id: 1,
-    src: '/Ratis/photos/barcelona.jpg',
-    descripcio: 'Casa nostra. La ciutat on tot va començar.',
+    src: '/Ratis/photos/torre.JPG',
+    descripcio: 'El port de Torredembarra, la nostra platja.',
   },
   {
     id: 2,
-    src: '/Ratis/photos/paris.jpg',
-    descripcio: 'Passejant per la vora del Sena al capvespre.',
+    src: '/Ratis/photos/cordoba.jpg',
+    descripcio: 'Escapada al sud, perduts pels carrers de Còrdova.',
   },
   {
     id: 3,
-    src: '/Ratis/photos/roma.jpg',
-    descripcio: 'Vam llançar una moneda a la Fontana di Trevi.',
+    src: '/Ratis/photos/gorrita.jpg',
+    descripcio: 'Les nostres cares, molt juntetes.',
   },
   {
     id: 4,
-    src: '/Ratis/photos/lisboa.jpg',
-    descripcio: 'Tramvies, pastéis de nata i el Tajo al fons.',
+    src: '/Ratis/photos/padelsurf.jpg',
+    descripcio: 'Padelsurf a Eivissa, estiu pur.',
   },
   {
     id: 5,
-    src: '/Ratis/photos/amsterdam.jpg',
-    descripcio: 'Canals, bicicletes i tulipes a tot arreu.',
-  },
-  {
-    id: 6,
-    src: '/Ratis/photos/londres.jpg',
-    descripcio: 'Pluja, mercats vintage i una tassa de té.',
-  },
-  {
-    id: 7,
-    src: '/Ratis/photos/praga.jpg',
-    descripcio: 'Ponts de pedra i la ciutat daurada al capvespre.',
-  },
-  {
-    id: 8,
-    src: '/Ratis/photos/kyoto.jpg',
-    descripcio: 'Bambus i tardor vermella als temples.',
+    src: '/Ratis/photos/forky.jpg',
+    descripcio: 'Fent el tonto a l\'ascensor amb el Forky.',
   },
 ]
