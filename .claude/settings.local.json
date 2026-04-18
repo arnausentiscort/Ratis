@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(gh api:*)",
+      "Bash(where ffmpeg:*)",
+      "Bash(where magick:*)",
+      "Bash(where convert:*)",
+      "Bash(where node:*)",
+      "Bash(node -e \"console.log\\(process.version\\)\")",
+      "Bash(node -e \"require\\('sharp'\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(powershell -Command \"Remove-Item padelsurf.JPG; Rename-Item padelsurf_conv.jpg padelsurf.jpg; Remove-Item cordoba_orig.heic; Remove-Item forky_orig.heic; Remove-Item gorrita_orig.heic; Get-ChildItem | Select-Object Name\")"
     ]
   }
 }

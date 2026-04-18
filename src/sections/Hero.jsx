@@ -163,18 +163,34 @@ export default function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 1.4, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           style={{
-            marginTop: '18px',
+            marginTop: '14px',
             fontFamily: '"DM Sans", sans-serif',
-            fontSize: '0.88rem',
+            fontSize: '1.05rem',
             fontWeight: '300',
-            letterSpacing: '0.24em',
-            color: 'rgba(255,255,255,0.6)',
+            letterSpacing: '0.18em',
+            color: 'rgba(255,255,255,0.75)',
+          }}
+        >
+          Arnau &amp; Núria
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.4, delay: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
+          style={{
+            marginTop: '10px',
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: '0.78rem',
+            fontWeight: '300',
+            letterSpacing: '0.22em',
+            color: 'rgba(255,255,255,0.45)',
             textTransform: 'lowercase',
           }}
         >
-          des del 2023
+          des del 2 d&apos;abril de 2022
         </motion.p>
       </div>
 

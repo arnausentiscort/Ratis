@@ -26,13 +26,14 @@ const categories = [
     ],
   },
   {
-    titol: "Llocs",
+    titol: "Rituals",
     bgColor: '#EEF2ED',
     borderColor: '#A8B8A0',
     items: [
-      { emoji: '🌅', nom: 'La nostra platja', desc: 'Sempre al capvespre, mai al migdia.' },
-      { emoji: '☕', nom: 'Cafè Cosmo', desc: 'On escrivim, llegim i ens mirem.' },
-      { emoji: '🌿', nom: 'Parc de la Ciutadella', desc: 'Passeigs sense rumb ni pressa.' },
+      { emoji: '📺', nom: 'Capitulin', desc: "Una sèrie, el sofà i la millor excusa per no moure's." },
+      { emoji: '🍝', nom: 'Carbonara', desc: 'La fem nosaltres i la busquem als restaurants italians. És la nostra mesura de tot.' },
+      { emoji: '😴', nom: 'Siesta junts', desc: 'Infravalorem molt la siesta. Nosaltres no.' },
+      { emoji: '🛶', nom: 'Caiac', desc: 'No ens encanta. Però sempre hi acabem. Sempre.' },
     ],
   },
 ]
