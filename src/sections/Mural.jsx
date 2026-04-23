@@ -28,7 +28,7 @@ function formatDataDisplay(dataStr) {
 
 function Lightbox({ photo, onClose }) {
   const { lat, lloc, data } = useExif(photo.src)
-  const llocDisplay = lloc ?? (lat == null ? null : lloc)
+  const llocDisplay = photo.lloc ?? lloc ?? null
   const dataDisplay = formatDataDisplay(data)
 
   useEffect(() => {
@@ -147,7 +147,7 @@ function Card({ photo, index, onOpen }) {
   const height = HEIGHTS[index % HEIGHTS.length]
   const placeholder = PLACEHOLDER_COLORS[index % PLACEHOLDER_COLORS.length]
 
-  const llocDisplay = lloc ?? (lat == null ? 'Sense ubicació' : lloc)
+  const llocDisplay = photo.lloc ?? lloc ?? (lat == null ? 'Sense ubicació' : lloc)
   const dataDisplay = formatDataDisplay(data)
 
   return (

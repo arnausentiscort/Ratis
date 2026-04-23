@@ -47,7 +47,8 @@ function PhotoMarker({ photo, onSelect }) {
 
 // ── Panel lateral que s'obre en clicar un pin ──
 function PhotoPanel({ photo, onClose }) {
-  const { data, lloc } = useExif(photo.src)
+  const { data, lloc: llocExif } = useExif(photo.src)
+  const lloc = photo.lloc ?? llocExif
   const [imgError, setImgError] = useState(false)
 
   return createPortal(
